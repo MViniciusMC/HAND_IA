@@ -4,6 +4,31 @@ import mediapipe as mp
 import pandas as pd
 
 
+def qualletra(idatual, pontos):
+    if idatual[0] == 12  and idatual[1] == 8  and idatual[2] ==  11:
+        return 'R'
+    elif idatual[-1] in [12,8,11,16] and idatual[-2] in [12,8,11,16] and idatual[-3] in [12,8,11,16]:
+        if pontos[20][1]<= pontos[19][1] :
+            return 'M'
+    elif idatual[0] == 10  and idatual[1] == 6  and idatual[2] == 14:
+        return 'S'
+    elif idatual[0] == 4  and idatual[1] == 10  and idatual[2] == 6  and idatual[3] == 14:
+        return 'A'
+
+    elif idatual[0] == 15 and idatual[1] == 11 and idatual[2] == 14:
+        return 'C'
+    elif idatual[0] == 10  and idatual[1] == 14  and idatual[2] == 6:
+        return 'O'
+    elif idatual[0] == 5  and idatual[1] == 9  and idatual[2] == 6:
+        return '-'
+
+
+    
+
+
+
+
+
 # aqui estamos abrindo a camera
 cap = cv.VideoCapture(0)
 # aqui começamos a utilizar o mp veja que estamos instanciando 
@@ -13,6 +38,10 @@ hand =mp.solutions.hands
 Hand = hand.Hands(max_num_hands=3)
 #responsavel por desenhar a mão
 mpDraw =mp.solutions.drawing_utils
+contador = ''
+letra_a_esq = [4, 6, 10, 14, 18, 9, 13, 5, 17, 3, 7, 19, 11, 15, 20, 8, 12, 2, 16, 1, 0]
+letra_a_dir = [10, 14, 18, 6, 17, 13, 9, 4, 5, 19, 15, 11, 3, 7, 20, 16, 12, 8, 2, 0, 1]
+
 while True:
     #pega a imagem da camera
     check,img = cap.read()
@@ -49,33 +78,35 @@ while True:
                 pontos.append((cx, cy))
                 lista_cy.append(cy)
                 ordem_dos_pontos= {'id': lista_id,'cy':lista_cy}
-                #assim podemos gerar uma logica onde o ponto superior do dedo estiver a baixo do ponto mais baixo o dedo esta abaixado
-    #todos os dedos menos o dedão a logica para ele é diferente
-    dedos = [8, 12, 16, 20]
-    letram = [0,1,2,5,3,17,9,13,4,20,18,19,6,14,16,15,10,7,11,8,12]
-    letram2 = [0,1,2,3,4,17,5,13,9,18,6,14,10,19,7,20,15,11,8,16,12]
-
-    contador = 'no'
     if pontos:
         #m
         df = pd.DataFrame(ordem_dos_pontos)
         df = df.sort_values('cy')
         idatual = list(df['id'])
         print(idatual)
-        if idatual[-1] in [12,8,11,16] and idatual[-2] in [12,8,11, 16] and idatual[-3] in [12,8,11,16] and pontos[20][1]<= pontos[19][1]:
-             contador = 'M'
+        nl = ''
+        nl =qualletra(idatual, pontos)
+        print(nl)
+        if nl != None:
+            if contador == '':
+                contador = nl
+            elif contador != nl  and len(contador) == 1 :
+                contador += nl
+            elif len(contador) > 1 and contador[-1] != nl:
+                contador += nl
+        if nl == '-':
+            contador = ''
+        
     
 
 
-    cv.rectangle(img,(80,10),(200,100),(255,255,255),-1)
+    cv.rectangle(img,(80,10),(600,120),(255,255,255),-1)
     cv.putText(img,str(contador),(100, 100), cv.FONT_HERSHEY_SIMPLEX,4,(255, 0,0),5)
     #aqui estamos abrindo a imagem 
     #mostra a tela com o nome de imagem 
     cv.imshow("IA de Hand", img)
     #aqui é o tempo de delay 
     cv.waitKey(1)
-    
-    
     
 
 
